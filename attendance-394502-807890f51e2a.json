@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "attendance-394502",
+  "private_key_id": "807890f51e2a19a6c7cdb717a0aba4d3b2b85c4c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCkirhoHg5+sbFP\njttsqeA8PAZQkee2iMkgG7gTiF9X46eAqDQzPqy9U3YE73c/kjee+9RV64fIQHO4\nF8v/WqCh0pNHzcQ4ezaEit6yvtfxXzVVGGhH/HblBS/nLxyXYPmdY7fVH3iegda+\nEEwY65NY4M3ehbRkvBTcuFK7XiQhJFObuK+G35v4OAJudo8mdWh6df2Sbrn0NIiN\noPZ4AGhcsS31BO/N5YoA0hEfIOc2zKofsFSzC/oCdz+lyeqPoTuI7fOgQuoAqAU/\nTW7p+KPVsCB2hRsc1ghDJgxXQeWZjOXcV0VvAQpKvaqyxkySzf+IXuq35lW7NLMz\nONghS2lLAgMBAAECggEAPTmo+IUGm7n+4j2kBEEJwSAMsXo5IECxphLqYcpCv+9j\n6omsMs1FdYVSyu9YDf2YWL4X+oiTk7330S55p+DPGKfESdmVA/dFB/iseRJuQ9BL\nhgh49SBKFVniw0FSgDmDaD8srk7xkPl7MGncBwHRaCbuM7jIsRsTIDYuAq46/2Fu\nLPosoDSlZTow6nKKw1ecc2rI89pyqRw/+mELK1kkxjICNos0/kr8oDxUz+4rVn40\nwhl3Yppjfs28503cSqf8wYX0lmj4oQgKR1art+6SH3pe3ewuAF0ObnpgCVb3fBJa\nH3DvBNziYSs1c85q/57N0mOZkoAWEvK/hiMwLHQC0QKBgQDUr94oeCtxeubcjSw5\nr5hSpsDMzns6qd9JyFObuGbbEhbEXVwlFNJdDK2iAwmCHzoKP2b9Z71nP0v+2aBj\n/cRPUoO8GcyjbEYc+RgttC0UhyCy89FPTAJsqPe+XFeTbVWejdauIRLuQKQ7MtdO\ncFTRUggd97Z/zVtbwu8n2OLC5wKBgQDGDOBI1+RKzZvT+COrCzcIZmQ01PbEZEYo\nrTr874z0B7Pq+5rQSsOSSXAHQzIsCjlr/h5zyNehwwJQjebug4p//C++KqG0bckQ\n8wjGW7XUJq8wyb2aF6JCewkty/rAfnUmk5vha9Q1dvH1Ctz4UYbVY1wcs3zyWKqO\n67wclQp9/QKBgFo8R1gKK/xYdWwrZREQY+LlJrV+ASBRhA+Ms5REtzbIxOoI5hhB\nbkLWJzCuczFGyFwirDJk+iG85CQ69uaVet1gl82NcJoBTPnr4Qs6/0lPT1s9QJeR\nGxI42etkyC8fWw0LBoMYOyzkNgl7t4dq90FbuV/lggNVACa9XLQeO48PAoGAIIjQ\n92Zv3FH2fVXQFjMbcUfQwlURzKVkWR5MCG0ZzKTPS5TVk84UXp2tx6OkRFPRpwnx\n2rdtpOcyJCWLgDcfs3KsLSM3uTonw58JG/zI2/cW5H7fpMapIx6vHVTa9nBPsmyh\nOODL1ZSantSQBELwUXGnGhfqOK2UJzJWjqN1O8kCgYA+JPpUVDOiGV13BnSUe41N\nPsOwseSjCtYAL9Ef/32jA4yPSNzOCgRts3HYvrO7nsRI87JEU6nFLWkyroh4B6zG\ng1/x4vCOaP2ynpI+ARgUgAcqGsbFrMpi5Kr84gU/TmVV/EUEWF6ZwqfsYLbgSQ78\nXxT8cRFZ93s5PaF/LuuVwQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "school-admin@attendance-394502.iam.gserviceaccount.com",
+  "client_id": "112521378590688314029",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/school-admin%40attendance-394502.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
