@@ -15,7 +15,7 @@ const start = async () => {
     const data = await getAttendance(tabName);
     data.forEach((e) => {
         if(e.status == "Vắng"){
-            const notiId = e.id + e.class;
+            const notiId = e.id + e.class + moment(new Date()).startOf("D").format("DDMMYYYY");
             if(!notiList.has(notiId)){
                 notiList.set(notiId, e);
                 teachers = getTecherByClass(e.class);

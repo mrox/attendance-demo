@@ -1,5 +1,6 @@
 FROM node:18
-
+RUN sudo echo "Asia/Ho_Chi_Minh" > /etc/timezone
+RUN sudo dpkg-reconfigure -f noninteractive tzdata
 # Create app directory
 WORKDIR /usr/src/app
 
