@@ -11,7 +11,6 @@ const notiList = new Map();
 
 const start = async () => {
     // Start attendance service
-    console.log();
     const data = await getAttendance(tabName);
     data.forEach((e) => {
         if(e.status == "Vắng"){
@@ -26,7 +25,7 @@ const start = async () => {
                     teachers.forEach((t) => {
                         console.log("Send notification to " + e.name);
                         console.log(t);
-                        if(t.token.length > 0)
+                        if(t.token && t.token.length > 0)
                             sendNotificationToDevice(t.token, "Thông báo", `Bạn có học sinh vắng: ${e.name} `, {type: "attendance"});
                     })
                 }
