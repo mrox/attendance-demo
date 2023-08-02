@@ -16,15 +16,6 @@ app.use(cors({
     origin: '*'
 }));
 
-(async () => {
-    try {
-        await teachers.getTeachers();
-        attendance.start();
-        
-    } catch (error) {
-        console.log(error);
-    }
-})();
 
 
 app.post('/api/teachers', async (req, res) => {
@@ -35,8 +26,6 @@ app.post('/api/teachers', async (req, res) => {
 
 app.get('/api/teachers/notification', async (req, res) => {
     const notis = global.notiList?.get(req.query['email'])
-    await new Promise(r => setTimeout(() => r(), 20000));
-
     res.send(notis);
 });
 
@@ -50,6 +39,10 @@ app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
   });
 
-app.listen(port, () => {
+app.listen(port, async () => {
     console.log(`Example app listening on port ${port}`)
+
+    await teachers.getTeachers();
+    attendance.start();
+
 })

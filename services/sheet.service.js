@@ -16,6 +16,7 @@ async function _getGoogleSheetClient() {
 }
 
 async function _readGoogleSheet(googleSheetClient, sheetId, tabName, range) {
+    
     const res = await googleSheetClient.spreadsheets.values.get({
         spreadsheetId: sheetId,
         range: `${tabName}!${range}`,
@@ -24,7 +25,16 @@ async function _readGoogleSheet(googleSheetClient, sheetId, tabName, range) {
     return res.data.values;
 }
 
+async function _getSheets(){
+    const googleSheetClient = await _getGoogleSheetClient();
+    const res = await googleSheetClient.spreadsheets.get({
+        spreadsheetId: sheetId,
+    })
+    return res.data.sheets
+}
+
 module.exports = {
+    _getSheets,
     _getGoogleSheetClient,
     _readGoogleSheet
 }

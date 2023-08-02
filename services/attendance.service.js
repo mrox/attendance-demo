@@ -1,6 +1,6 @@
 
 const moment = require('moment');
-const {_readGoogleSheet, _getGoogleSheetClient} = require('./sheet.service');
+const {_readGoogleSheet, _getGoogleSheetClient, _getSheets} = require('./sheet.service');
 const {getTecherByClass, teacherList, adminList} = require('./teacher.service');
 const { sendNotificationToDevice } = require('./notification.service');
 const sheetId = '1dRH0Sk1OY-mOvB6cX001zBj5A2TtO1d4nPY_BUAJ8K4'
@@ -11,51 +11,56 @@ global.notiList = new Map();
 
 const start = async () => {
     // Start attendance service
-    const data = await getAttendance(tabName);
-    data.forEach(async (e) => {
-        if(e.status == "Vắng"){
-            const notiId = e.id + e.class + moment(new Date()).startOf("D").format("DDMMYYYY");
-
-            if(!notiList.has(notiId)){
-                teachers = getTecherByClass(e.class);
-                console.log(`Teacher of ${e.class}: ${teachers.map(tc => tc.email).join(",")}`);
-                if(teachers.length > 0)
-                {
-                    notiList.set(notiId, e);
-                    teachers.forEach((t) => {
-                        console.log("Send notification to " + t.email);
-                        // console.log(t);
-                        if(t.token && t.token.length > 0)
-                        {
-                            const rs = sendNotificationToDevice(t.token, "Thông báo", `Bạn có học sinh vắng: ${e.name} `, {type: "attendance"});
-                            e.date = new Date();
-                            e.notiClass = tabName
-                            if(global.notiList.has(t.email)){
-                                let v = global.notiList.get(t.email);
-                                v.push(e)
-                                global.notiList.set(t.email, v)
+    const sheets = await _getSheets();
+    if(sheets.length <= 1) return;
+    for (const s of sheets) {
+        const data = await getAttendance(s.properties.title);
+        data.forEach(async (e) => {
+            if(e.status == "Vắng"){
+                const notiId = e.id + e.class + moment(new Date()).startOf("D").format("DDMMYYYY")+s;
+                if(!notiList.has(notiId)){
+                    teachers = getTecherByClass(e.class);
+                    console.log(`Teacher of ${e.class}: ${teachers.map(tc => tc.email).join(",")}`);
+                    if(teachers.length > 0)
+                    {
+                        notiList.set(notiId, e);
+                        teachers.forEach((t) => {
+                            console.log("Send notification to " + t.email);
+                            // console.log(t);
+                            if(t.token && t.token.length > 0)
+                            {
+                                const rs = sendNotificationToDevice(t.token, "Thông báo", `Bạn có học sinh vắng: ${e.name} lớp ${s.properties.title} `, {type: "attendance"});
+                                e.date = new Date();
+                                e.notiClass = s.properties.title
+                                e.sheetId = s.properties.sheetId
+                                e.key = sheetId
+                                if(global.notiList.has(t.email)){
+                                    let v = global.notiList.get(t.email);
+                                    v.push(e)
+                                    global.notiList.set(t.email, v)
+                                }
+                                else global.notiList.set(t.email, [e])
                             }
-                            else global.notiList.set(t.email, [e])
-                        }
-                    })
+                        })
+                    }
                 }
+
             }
-
-        }
-            
-    })
-    //
-
-
-    // console.log(data);
-    // console.log(fullData);   
+                
+        })
+    }
+    console.log(`diem danh xong`);
+    // sheets.forEach(async s => {
+        
+    // })
+    
 
 }
 
 const getAttendance = async (sheet) => {
+    console.log(`Thc hien diem danh:`, sheet);
     const googleSheetClient = await _getGoogleSheetClient();
 
-    // Reading Google Sheet from a specific range
     const data = await _readGoogleSheet(googleSheetClient, sheetId, sheet, range);
     const students = []
     data.forEach((e, row) => {
@@ -91,7 +96,7 @@ const getAttendance = async (sheet) => {
                         
                     }
                 }
-                
+                else return []
             })
         }
     });
