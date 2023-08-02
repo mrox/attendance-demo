@@ -18,15 +18,18 @@ const start = async () => {
             const notiId = e.id + e.class + moment(new Date()).startOf("D").format("DDMMYYYY");
 
             if(!notiList.has(notiId)){
-                notiList.set(notiId, e);
                 teachers = getTecherByClass(e.class);
                 console.log(`Teacher of ${e.class}: ${teachers.join(", ")}}`);
-                teachers.forEach((t) => {
-                    console.log("Send notification to " + e.name);
-                    console.log(t);
-                    if(t.token.length > 0)
-                        sendNotificationToDevice(t.token, "Thông báo", `Bạn có học sinh vắng: ${e.name} `, {type: "attendance"});
-                })
+                if(teachers.length > 0)
+                {
+                    notiList.set(notiId, true);
+                    teachers.forEach((t) => {
+                        console.log("Send notification to " + e.name);
+                        console.log(t);
+                        if(t.token.length > 0)
+                            sendNotificationToDevice(t.token, "Thông báo", `Bạn có học sinh vắng: ${e.name} `, {type: "attendance"});
+                    })
+                }
             }
 
         }

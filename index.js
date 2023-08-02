@@ -16,8 +16,10 @@ app.use(cors({
     origin: '*'
 }));
 
-teachers.getTeachers();
-attendance.start();
+(async () => {
+    await teachers.getTeachers();
+    attendance.start();
+})();
 
 
 app.post('/api/teachers', async (req, res) => {
