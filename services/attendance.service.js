@@ -56,15 +56,21 @@ const getAttendance = async (sheet) => {
                     const today = moment(new Date()).startOf("D")
                     if(columnDate.isSame(today)){
                         const time = data[row +1][column];
-                        for(i = 2; i < data.length; i++){
-                            const student = {
-                                id: data[i][0],
-                                name: data[i][1],
-                                class: data[i][2],
-                                status: data[i][column]
+                        const timeStart = moment(time.split("-")[0], "HH:mm");
+                        const timeEnd = moment(time.split("-")[1], "HH:mm");
+                        const now = moment(new Date());
+                        if(now.isBetween(timeStart, timeEnd)){
+                            for(i = 2; i < data.length; i++){
+                                const student = {
+                                    id: data[i][0],
+                                    name: data[i][1],
+                                    class: data[i][2],
+                                    status: data[i][column]
+                                }
+                                students.push(student);
                             }
-                            students.push(student);
                         }
+                        
                     }
                 }
                 
