@@ -2,6 +2,8 @@ FROM node:18
 # RUN sudo echo "Asia/Ho_Chi_Minh" > /etc/timezone
 # RUN sudo dpkg-reconfigure -f noninteractive tzdata
 # Create app directory
+ENV TZ="Asia/Ho_Chi_Minh"
+
 WORKDIR /usr/src/app
 
 # Install app dependencies
