@@ -94,8 +94,12 @@ const sendNotiToAdmin = async (sheet)=> {
     console.log(`admin: `, adminList);
     adminList.forEach(v => {
         // console.log(v);
-        if(v.token && v.token.length > 0)
-        sendNotificationToDevice(v.token, "Thông báo", `Lớp: ${sheet} chưa thực hiện điểm danh`, {type: "attendance_late"});
+        const id = v.email + sheet + moment(new Date()).format("DDMMYYYY");
+        if(!notiList.has(id))
+            if(v.token && v.token.length > 0){
+                notiList.set(id, true)
+                sendNotificationToDevice(v.token, "Thông báo", `Lớp: ${sheet} chưa thực hiện điểm danh`, {type: "attendance_late"});
+            }
     })
 
 }
