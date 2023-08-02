@@ -59,6 +59,7 @@ const getAttendance = async (sheet) => {
                         const timeStart = moment(time.split("-")[0], "HH:mm");
                         const timeEnd = moment(time.split("-")[1], "HH:mm");
                         const now = moment(new Date());
+                        console.log(timeStart, timeEnd, now);
                         if(now.isBetween(timeStart, timeEnd)){
                             for(i = 2; i < data.length; i++){
                                 const student = {
