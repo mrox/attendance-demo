@@ -28,7 +28,7 @@ async function getTeachers() {
             if(teacher.class.includes('ADMIN')){
                 adminList.push(teacher)
             }
-
+            
         }
     });
     teacherList = teachers

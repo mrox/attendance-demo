@@ -17,8 +17,13 @@ app.use(cors({
 }));
 
 (async () => {
-    await teachers.getTeachers();
-    attendance.start();
+    try {
+        await teachers.getTeachers();
+        attendance.start();
+        
+    } catch (error) {
+        console.log(error);
+    }
 })();
 
 
@@ -26,6 +31,13 @@ app.post('/api/teachers', async (req, res) => {
     const teacher = req.body;
     await updateTeacherByEmail(teacher);
     res.send(teacher);
+});
+
+app.get('/api/teachers/notification', async (req, res) => {
+    const notis = global.notiList?.get(req.query['email'])
+    await new Promise(r => setTimeout(() => r(), 20000));
+
+    res.send(notis);
 });
 
 
