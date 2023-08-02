@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 
 const serviceAccountKeyFile = "./attendance-394502-807890f51e2a.json";
-
+const sheetId = '1dRH0Sk1OY-mOvB6cX001zBj5A2TtO1d4nPY_BUAJ8K4'
 
 async function _getGoogleSheetClient() {
     const auth = new google.auth.GoogleAuth({
@@ -22,4 +22,9 @@ async function _readGoogleSheet(googleSheetClient, sheetId, tabName, range) {
     });
 
     return res.data.values;
+}
+
+module.exports = {
+    _getGoogleSheetClient,
+    _readGoogleSheet
 }

@@ -4,8 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@abandonware/noble": "^1.9.2-23",
+    "advlib-ble-manufacturers": "^1.5.0",
+    "advlib-ble-services": "^1.3.6",
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "googleapis": "^123.0.0"
+    "firebase-admin": "^11.10.1",
+    "googleapis": "^123.0.0",
+    "moment": "^2.29.4"
   }
 }
