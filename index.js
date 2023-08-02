@@ -1,12 +1,8 @@
-const { google } = require('googleapis');
-const moment = require('moment');
-const serviceAccountKeyFile = "./attendance-394502-807890f51e2a.json";
-const sheetId = '1dRH0Sk1OY-mOvB6cX001zBj5A2TtO1d4nPY_BUAJ8K4'
-const tabName = 'Lớp vẽ'
-const range = 'A:L'
+
 const {updateTeacherByEmail} = require('./services/teacher.service.js');
 const attendance = require('./services/attendance.service.js');
 const teachers = require('./services/teacher.service.js');
+const path = require('path');
 
 const express = require('express')
 const bodyParser = require('body-parser');
@@ -119,6 +115,15 @@ app.post('/api/teachers', async (req, res) => {
     res.send(teacher);
 });
 
+
+// Have Node serve the files for our built React app
+app.use(express.static(path.resolve(__dirname, 'dist')));
+
+
+// All other GET requests not handled before will return our React app
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+  });
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
