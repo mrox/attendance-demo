@@ -4,7 +4,7 @@ const sheetId = '1dRH0Sk1OY-mOvB6cX001zBj5A2TtO1d4nPY_BUAJ8K4'
 const tabName = 'GV'
 const range = 'A:E'
 let teacherList = []
-
+let adminList = []
 async function getTeachers() {
     console.log(`Get teachers`);
     const googleSheetClient = await _getGoogleSheetClient();
@@ -20,10 +20,15 @@ async function getTeachers() {
                 id: e[0],
                 name: e[1],
                 email: e[2],
-                class: e[3].split(",").map(e => e.trim()),
+                class: e[3].split(",").map(e => e.trim().toUpperCase()),
                 token: e[4],
             }
             teachers.push(teacher);
+            // console.log(teacher.class);
+            if(teacher.class.includes('ADMIN')){
+                adminList.push(teacher)
+            }
+
         }
     });
     teacherList = teachers
@@ -109,6 +114,7 @@ const getTecherByClass = (classId) => {
 }
 module.exports = {
     teacherList,
+    adminList,
     getTeachers,
     getTeacherByEmail,
     updateTeacherTokenByEmail,

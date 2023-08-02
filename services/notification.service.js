@@ -17,7 +17,6 @@ const sendNotificationToDevice = async (token, title, body, data) => {
     const response = await admin.messaging().send(message);
     console.log(response);
 }
-
 module.exports = {
     sendNotificationToDevice
 }
