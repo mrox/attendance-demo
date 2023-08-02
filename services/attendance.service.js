@@ -77,7 +77,7 @@ const getAttendance = async (sheet) => {
                             }
                         }
                         if(sendLateAttendance && now.isAfter(timeStart.add(10, "m"))){
-                            sendNotiToAdmin(sheet)
+                            sendNotiToAdmin(sheet, timeStart)
                         }
                         
                     }
@@ -89,12 +89,12 @@ const getAttendance = async (sheet) => {
     return students;
 }
 
-const sendNotiToAdmin = async (sheet)=> {
+const sendNotiToAdmin = async (sheet, timeStart)=> {
     console.log("sendLateAttendance");
     console.log(`admin: `, adminList);
     adminList.forEach(v => {
         // console.log(v);
-        const id = v.email + sheet + moment(new Date()).format("DDMMYYYY");
+        const id = v.email + sheet + timeStart.format("DDMMYYYYhhmm");
         if(!notiList.has(id))
             if(v.token && v.token.length > 0){
                 notiList.set(id, true)
