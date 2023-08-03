@@ -17,7 +17,6 @@ app.use(cors({
 }));
 
 
-
 app.post('/api/teachers', async (req, res) => {
     const teacher = req.body;
     await updateTeacherByEmail(teacher);

@@ -3,6 +3,7 @@ const moment = require('moment');
 const {_readGoogleSheet, _getGoogleSheetClient, _getSheets} = require('./sheet.service');
 const {getTecherByClass, teacherList, adminList} = require('./teacher.service');
 const { sendNotificationToDevice } = require('./notification.service');
+const { sendNotificationEmail } = require('./email.service');
 const sheetId = '1dRH0Sk1OY-mOvB6cX001zBj5A2TtO1d4nPY_BUAJ8K4'
 const tabName = 'Lớp vẽ'
 const range = 'A:L'
@@ -27,20 +28,33 @@ const start = async () => {
                         teachers.forEach((t) => {
                             console.log("Send notification to " + t.email);
                             // console.log(t);
-                            if(t.token && t.token.length > 0)
-                            {
-                                const rs = sendNotificationToDevice(t.token, "Thông báo", `Bạn có học sinh vắng: ${e.name} lớp ${s.properties.title} `, {type: "attendance"});
-                                e.date = new Date();
-                                e.notiClass = s.properties.title
-                                e.sheetId = s.properties.sheetId
-                                e.key = sheetId
-                                if(global.notiList.has(t.email)){
-                                    let v = global.notiList.get(t.email);
-                                    v.push(e)
-                                    global.notiList.set(t.email, v)
-                                }
-                                else global.notiList.set(t.email, [e])
+                            if(t.notiEmail && t.email && t.email.length > 0){
+                                console.log(`Send email to ${t.email}`);
+                                sendNotificationEmail(t.email,{
+                                    subject: "Thông báo",
+                                    text: `Bạn có học sinh vắng: ${e.name} lớp ${s.properties.title} (${"https://attendance.jmt.vn"})`,
+                                    html: `<p>Bạn có học sinh vắng: ${e.name} lớp ${s.properties.title} (<a href="${"https://attendance.jmt.vn"}">Chi tiết</a>)</p>`
+                                });
                             }
+                            if(t.notiApp && t.token && t.token.length > 0)
+                            {
+                                sendNotificationToDevice(
+                                    t.token, "Thông báo", 
+                                    `Bạn có học sinh vắng: ${e.name} lớp ${s.properties.title} `, 
+                                    {type: "attendance"},
+                                    "https://attendance.jmt.vn"
+                                    );
+                            }
+                            e.date = new Date();
+                            e.notiClass = s.properties.title
+                            e.sheetId = s.properties.sheetId
+                            e.key = sheetId
+                            if(global.notiList.has(t.email)){
+                                let v = global.notiList.get(t.email);
+                                v.push(e)
+                                global.notiList.set(t.email, v)
+                            }
+                            else global.notiList.set(t.email, [e])
                         })
                     }
                 }

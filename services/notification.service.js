@@ -5,14 +5,19 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 
-const sendNotificationToDevice = async (token, title, body, data) => {
+const sendNotificationToDevice = async (token, title, body, data, url) => {
     const message = {
         notification: {
             title: title,
-            body: body
+            body: body,
         },
         data: data,
         token: token
+    }
+    if(url) message.webpush = {
+        fcmOptions: {
+            link: url
+        }
     }
     const response = await admin.messaging().send(message);
     console.log(response);

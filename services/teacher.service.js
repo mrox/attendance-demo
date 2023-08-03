@@ -2,7 +2,7 @@ const { google } = require('googleapis');
 const {_getGoogleSheetClient, _readGoogleSheet} = require('./sheet.service');
 const sheetId = '1dRH0Sk1OY-mOvB6cX001zBj5A2TtO1d4nPY_BUAJ8K4'
 const tabName = 'GV'
-const range = 'A:E'
+const range = 'A:G'
 let teacherList = []
 let adminList = []
 async function getTeachers() {
@@ -22,6 +22,8 @@ async function getTeachers() {
                 email: e[2],
                 class: e[3].split(",").map(e => e.trim().toUpperCase()),
                 token: e[4],
+                notiApp: e[5] === 'TRUE' ? true : false,
+                notiEmail: e[6] === 'TRUE' ? true : false,
             }
             teachers.push(teacher);
             // console.log(teacher.class);
@@ -32,6 +34,7 @@ async function getTeachers() {
         }
     });
     teacherList = teachers
+    console.log(teacherList);
     return teachers;
 }
 
@@ -76,7 +79,7 @@ async function updateTeacherByEmail(newTeacher) {
         const row = data.findIndex(e => e[2] == teacher.email);
         const column = 1;
         const updateRange = `${tabName}!${String.fromCharCode(65 + column)}${row + 1}`;
-        const updateValue = [[newTeacher.name, newTeacher.email, newTeacher.class, newTeacher.token]];
+        const updateValue = [[newTeacher.name, newTeacher.email, newTeacher.class, newTeacher.token, newTeacher.notiApp, newTeacher.notiEmail]];
         const updateBody = {
             values: updateValue
         }
@@ -94,7 +97,7 @@ async function updateTeacherByEmail(newTeacher) {
         const row = data.length;
         const column = 0;
         const updateRange = `${tabName}!${String.fromCharCode(65 + column)}${row+1}`;
-        const updateValue = [[data.length,newTeacher.name, newTeacher.email, newTeacher.class, newTeacher.token]];
+        const updateValue = [[data.length,newTeacher.name, newTeacher.email, newTeacher.class, newTeacher.token, newTeacher.notiApp, newTeacher.notiEmail]];
         const updateBody = {
             values: updateValue
         }
