@@ -35,12 +35,18 @@ if (messaging) {
       console.log('Received background message: ', JSON.stringify(payload, null, 2));
 
       const notificationTitle = payload.notification.title;
-      const notificationOptions = { body: payload.notification.body };
+      const notificationOptions = { 
+        body: payload.notification.body, 
+        tag: "notification-1", 
+        sound: 'default' };
 
-      self.registration.showNotification(notificationTitle, notificationOptions);
+      // self.registration.showNotification(notificationTitle, notificationOptions);
+      // self.registration.hideNotification();
       console.log('showed notification');
     });
   } catch (err) {
     console.log(err);
   }
+
+
 }

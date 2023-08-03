@@ -10,8 +10,9 @@ const sendNotificationToDevice = async (token, title, body, data, url) => {
         notification: {
             title: title,
             body: body,
+            // sound: 'default',
         },
-        data: data,
+        // data: data,
         token: token
     }
     if(url) message.webpush = {
@@ -19,9 +20,14 @@ const sendNotificationToDevice = async (token, title, body, data, url) => {
             link: url
         }
     }
-    const response = await admin.messaging().send(message);
-    console.log(response);
-    return response
+    try {
+        
+        const response = await admin.messaging().send(message);
+        console.log(response);
+        return response
+    } catch (error) {
+        console.log(error);
+    }
 }
 module.exports = {
     sendNotificationToDevice
