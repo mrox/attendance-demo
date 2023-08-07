@@ -39,7 +39,8 @@ if (messaging) {
         body: payload.notification.body, 
         tag: "notification-1", 
         sound: 'default' };
-
+      
+      // Có thể gặp lỗi duplicate notification nếu showNotification được gọi thêm ở đây
       // self.registration.showNotification(notificationTitle, notificationOptions);
       // self.registration.hideNotification();
       console.log('showed notification');

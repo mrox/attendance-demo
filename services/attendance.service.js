@@ -16,6 +16,7 @@ const start = async () => {
     if(sheets.length <= 1) return;
     for (const s of sheets) {
         const data = await getAttendance(s.properties.title);
+        console.log(data);
         data.forEach(async (e) => {
             if(e.status == "Vắng"){
                 const notiId = e.id + e.class + moment(new Date()).startOf("D").format("DDMMYYYY")+s;

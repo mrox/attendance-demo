@@ -26,6 +26,7 @@ const sendNotificationToDevice = async (token, title, body, data, url) => {
         console.log(response);
         return response
     } catch (error) {
+        console.log('Error sending message:', message);
         console.log(error);
     }
 }
