@@ -1,7 +1,9 @@
 const nodemailer = require("nodemailer");
 const { emailList } = require("./teacher.service");
 
-const transporter = nodemailer.createTransport({
+let transporter ;
+try {
+  transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
     // secure: true,
@@ -10,10 +12,14 @@ const transporter = nodemailer.createTransport({
       pass: 'tnxpdqklsdobbyge'
     }
   });
-  
+} catch (error) {
+    console.log(error);
+}
+
   
 // async..await is not allowed in global scope, must use a wrapper
 async function sendNotificationEmail(email, content) {
+  if(!transporter) return;
   try {
     // send mail with defined transport object
     transporter.sendMail({
@@ -36,7 +42,12 @@ async function sendEmailToTopic(topic, content) {
   if(!emails) return;
   for (const email of emails) {
     if(email == "") continue;
-    await sendNotificationEmail(email, content);
+    try {
+      sendNotificationEmail(email, content);
+      
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 

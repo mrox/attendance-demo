@@ -104,49 +104,54 @@ const sendNotiToAdmin = async (sheet, timeStart, status) => {
     if (notiList.has(id)) return;
 
     notiList.set(id, true)
-    await sendNotificationToTopic(
-        "ADMIN", "Thông báo",
-        `Lớp ${sheet} chưa hoàn thành thực hiện điểm danh, số lượng học sinh chưa điểm danh: ${status.unknown}`,
-        { type: "attendance" },
-        "https://attendance.jmt.vn"
-    );
-    await sendEmailToTopic(
-        "ADMIN",
-        {
-            subject: `Lớp ${sheet} chưa hoàn thành thực hiện điểm danh`,
-            html: `<p>
-                    <b>Thông tin điểm danh lúc ${moment().format("HH:mm DD/MM/YYYY")}<b>
-                    <br>
-                    <b>Lớp: ${sheet}</b>
-                    <br>
-                    <b>Thời gian: ${timeStart.format("HH:mm")}</b>
-                    <br>
-                    <b>Số lượng học sinh:</b>
-                    <br>
-                    <b>Vắng: ${status.absent}</b>
-                    <br>
-                    <b>Vắng có phép: ${status.absendKnown}</b>
-                    <br>
-                    <b>Vào muộn: ${status.late}</b>
-                    <br>
-                    <b>Có mặt: ${status.onTime}</b>
-                    <br>
-                    <b>Chưa điểm danh: ${status.unknown}</b>
+    try {
 
-                </p>`,
-            text: `
-                    Thông tin điểm danh lúc ${moment().format("HH:mm DD/MM/YYYY")}
-                    Lớp: ${sheet}
-                    Thời gian: ${timeStart.format("HH:mm")}
-                    Số lượng học sinh:
-                    Vắng: ${status.absent}
-                    Vắng có phép: ${status.absendKnown}
-                    Vào muộn: ${status.late}
-                    Có mặt: ${status.onTime}
-                    Chưa điểm danh: ${status.unknown}
-                `
-        }
-    );
+        await sendNotificationToTopic(
+            "ADMIN", "Thông báo",
+            `Lớp ${sheet} chưa hoàn thành thực hiện điểm danh, số lượng học sinh chưa điểm danh: ${status.unknown}`,
+            { type: "attendance" },
+            "https://attendance.jmt.vn"
+        );
+        await sendEmailToTopic(
+            "ADMIN",
+            {
+                subject: `Lớp ${sheet} chưa hoàn thành thực hiện điểm danh`,
+                html: `<p>
+                        <b>Thông tin điểm danh lúc ${moment().format("HH:mm DD/MM/YYYY")}<b>
+                        <br>
+                        <b>Lớp: ${sheet}</b>
+                        <br>
+                        <b>Thời gian: ${timeStart.format("HH:mm")}</b>
+                        <br>
+                        <b>Số lượng học sinh:</b>
+                        <br>
+                        <b>Vắng: ${status.absent}</b>
+                        <br>
+                        <b>Vắng có phép: ${status.absendKnown}</b>
+                        <br>
+                        <b>Vào muộn: ${status.late}</b>
+                        <br>
+                        <b>Có mặt: ${status.onTime}</b>
+                        <br>
+                        <b>Chưa điểm danh: ${status.unknown}</b>
+    
+                    </p>`,
+                text: `
+                        Thông tin điểm danh lúc ${moment().format("HH:mm DD/MM/YYYY")}
+                        Lớp: ${sheet}
+                        Thời gian: ${timeStart.format("HH:mm")}
+                        Số lượng học sinh:
+                        Vắng: ${status.absent}
+                        Vắng có phép: ${status.absendKnown}
+                        Vào muộn: ${status.late}
+                        Có mặt: ${status.onTime}
+                        Chưa điểm danh: ${status.unknown}
+                    `
+            }
+        );
+    } catch (error) {
+        console.log(error);
+    }
 
     //         if(v.token && v.token.length > 0){
     //             notiList.set(id, true)
@@ -162,20 +167,25 @@ const sendNotiToTeacher = async (sheet, student) => {
     const notiId = sheet + student.class + moment(new Date()).startOf("D").format("DDMMYYYY") + student.name;
     if (notiList.has(notiId)) return;
     notiList.set(notiId, student);
-    sendNotificationToTopic(
-        student.class.toUpperCase(), "Thông báo",
-        `Bạn có học sinh vắng: ${student.name} lớp ${sheet} `,
-        { type: "attendance" },
-        "https://attendance.jmt.vn"
-    );
-    sendEmailToTopic(
-        student.class.toUpperCase(),
-        {
-            subject: "Thông báo vắng học",
-            html: `<p>Bạn có học sinh vắng: ${student.name} lớp ${sheet} </p>`,
-            text: `Bạn có học sinh vắng: ${student.name} lớp ${sheet} `
-        }
-    );
+    try {
+
+        sendNotificationToTopic(
+            student.class.toUpperCase(), "Thông báo",
+            `Bạn có học sinh vắng: ${student.name} lớp ${sheet} `,
+            { type: "attendance" },
+            "https://attendance.jmt.vn"
+        );
+        sendEmailToTopic(
+            student.class.toUpperCase(),
+            {
+                subject: "Thông báo vắng học",
+                html: `<p>Bạn có học sinh vắng: ${student.name} lớp ${sheet} </p>`,
+                text: `Bạn có học sinh vắng: ${student.name} lớp ${sheet} `
+            }
+        );
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 setInterval(async () => {
