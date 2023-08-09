@@ -1,114 +1,79 @@
 
 const moment = require('moment');
-const {_readGoogleSheet, _getGoogleSheetClient, _getSheets} = require('./sheet.service');
-const {getTecherByClass, teacherList, adminList} = require('./teacher.service');
-const { sendNotificationToDevice } = require('./notification.service');
-const { sendNotificationEmail } = require('./email.service');
-const sheetId = '1dRH0Sk1OY-mOvB6cX001zBj5A2TtO1d4nPY_BUAJ8K4'
-const tabName = 'Lớp vẽ'
-const range = 'A:L'
+const { _readGoogleSheet, _getSheets } = require('./sheet.service');
+const { sendNotificationToTopic } = require('./notification.service');
+const { sendNotificationEmail, sendEmailToTopic } = require('./email.service');
+
 const notiList = new Map();
 global.notiList = new Map();
 
 const start = async () => {
     // Start attendance service
     const sheets = await _getSheets();
-    if(sheets.length <= 1) return;
+    if (sheets.length <= 1) return;
     for (const s of sheets) {
+        if (s.properties.title === 'GV') continue;
         const data = await getAttendance(s.properties.title);
-        console.log(data);
-        data.forEach(async (e) => {
-            if(e.status == "Vắng"){
-                const notiId = e.id + e.class + moment(new Date()).startOf("D").format("DDMMYYYY")+s;
-                if(!notiList.has(notiId)){
-                    teachers = getTecherByClass(e.class);
-                    console.log(`Teacher of ${e.class}: ${teachers.map(tc => tc.email).join(",")}`);
-                    if(teachers.length > 0)
-                    {
-                        notiList.set(notiId, e);
-                        teachers.forEach((t) => {
-                            console.log("Send notification to " + t.email);
-                            // console.log(t);
-                            if(t.notiEmail && t.email && t.email.length > 0){
-                                console.log(`Send email to ${t.email}`);
-                                sendNotificationEmail(t.email,{
-                                    subject: "Thông báo",
-                                    text: `Bạn có học sinh vắng: ${e.name} lớp ${s.properties.title} (${"https://attendance.jmt.vn"})`,
-                                    html: `<p>Bạn có học sinh vắng: ${e.name} lớp ${s.properties.title} (<a href="${"https://attendance.jmt.vn"}">Chi tiết</a>)</p>`
-                                });
-                            }
-                            if(t.notiApp && t.token && t.token.length > 0)
-                            {
-                                sendNotificationToDevice(
-                                    t.token, "Thông báo", 
-                                    `Bạn có học sinh vắng: ${e.name} lớp ${s.properties.title} `, 
-                                    {type: "attendance"},
-                                    "https://attendance.jmt.vn"
-                                    );
-                            }
-                            e.date = new Date();
-                            e.notiClass = s.properties.title
-                            e.sheetId = s.properties.sheetId
-                            e.key = sheetId
-                            if(global.notiList.has(t.email)){
-                                let v = global.notiList.get(t.email);
-                                v.push(e)
-                                global.notiList.set(t.email, v)
-                            }
-                            else global.notiList.set(t.email, [e])
-                        })
-                    }
-                }
 
-            }
-                
-        })
     }
-    console.log(`diem danh xong`);
-    // sheets.forEach(async s => {
-        
-    // })
-    
 
 }
 
 const getAttendance = async (sheet) => {
-    console.log(`Thc hien diem danh:`, sheet);
-    const googleSheetClient = await _getGoogleSheetClient();
+    console.log(`Thc hien diem danh lớp:`, sheet);
 
-    const data = await _readGoogleSheet(googleSheetClient, sheetId, sheet, range);
+    const data = await _readGoogleSheet(sheet);
     const students = []
     data.forEach((e, row) => {
-        if(row == 0){
-            e.forEach((e1, column) => {
-                if(moment(e1, "MM/DD/YYYY", true).isValid()){
+        if (row == 0) {
+            e.forEach(async (e1, column) => {
+                if (moment(e1, "MM/DD/YYYY", true).isValid()) {
                     const columnDate = moment(e1, "MM/DD/YYYY");
                     const today = moment(new Date()).startOf("D")
-                    if(columnDate.isSame(today)){
-                        const time = data[row +1][column];
+                    if (columnDate.isSame(today)) {
+                        const time = data[row + 1][column];
                         const timeStart = moment(time.split("-")[0], "HH:mm");
                         const timeEnd = moment(time.split("-")[1], "HH:mm");
                         const now = moment(new Date());
-                        console.log(timeStart, timeEnd, now);
-                        //Gửi noti cho admin khi quá 10 phút mà chưa điểm danh
-                       
-                        let sendLateAttendance = false
-                        if(now.isBetween(timeStart, timeEnd)){
-                            for(i = 2; i < data.length; i++){
+                        if (now.isBetween(timeStart, timeEnd)) {
+
+                            console.log(`Đang kiểm tra điểm danh lớp ${sheet}, thời gian: ${moment(timeStart).format("HH:mm")} - ${moment(timeEnd).format("HH:mm")}}`);
+                            let studentsStatus = {
+                                late: 0,
+                                absent: 0,
+                                onTime: 0,
+                                absendKnown: 0,
+                                unknown: 0
+                            }
+                            let sendLateAttendance = false
+
+                            for (i = 2; i < data.length; i++) {
                                 const student = {
                                     id: data[i][0],
                                     name: data[i][1],
                                     class: data[i][2]?.toUpperCase(),
                                     status: data[i][column]
                                 }
-                                if(!student.status) sendLateAttendance = true;
+                                if (!student.status) {
+                                    sendLateAttendance = true;
+                                    studentsStatus.unknown++;
+                                }
+                                else if (student.status == "Vắng") {
+                                    studentsStatus.absent++
+                                    sendNotiToTeacher(sheet, student, timeStart, studentsStatus)
+                                }
+                                else if (student.status == "Vào muộn") studentsStatus.late++;
+                                else if (student.status == "Có mặt") studentsStatus.onTime++;
+                                else if (student.status == "Vắng có phép") studentsStatus.absendKnown++;
+
                                 students.push(student);
                             }
+                            if (sendLateAttendance && now.isAfter(timeStart.add(10, "m"))) {
+                                sendNotiToAdmin(sheet, timeStart, studentsStatus)
+                            }
                         }
-                        if(sendLateAttendance && now.isAfter(timeStart.add(10, "m"))){
-                            sendNotiToAdmin(sheet, timeStart)
-                        }
-                        
+
+
                     }
                 }
                 else return []
@@ -118,25 +83,105 @@ const getAttendance = async (sheet) => {
     return students;
 }
 
-const sendNotiToAdmin = async (sheet, timeStart)=> {
-    console.log("sendLateAttendance");
-    console.log(`admin: `, adminList);
-    adminList.forEach(v => {
-        // console.log(v);
-        const id = v.email + sheet + timeStart.format("DDMMYYYYhhmm");
-        if(!notiList.has(id))
-            if(v.token && v.token.length > 0){
-                notiList.set(id, true)
-                sendNotificationToDevice(v.token, "Thông báo", `Lớp: ${sheet} chưa thực hiện điểm danh`, {type: "attendance_late"});
-            }
-    })
+const sendNotiToAdmin = async (sheet, timeStart, status) => {
+    console.log(``);
+    console.log(`====== ${sheet}: ${moment(timeStart).format("HH:mm MM/DD")}======`);
+    console.log("|  sendLateAttendance to admin");
+    console.log(`|  Lớp: ${sheet} chưa hoàn thành thực hiện điểm danh`);
+    console.log(`|  Thời gian: ${timeStart.format("HH:mm")}`);
+    console.log(`|  Số lượng học sinh:`);
+    console.log(`|      Vắng: ${status.absent}`);
+    console.log(`|      Vắng có phép: ${status.absendKnown}`);
+    console.log(`|      Vào muộn: ${status.late}`);
+    console.log(`|      Có mặt: ${status.onTime}`);
+    console.log(`|      Chưa điểm danh: ${status.unknown}`);
+    console.log("====================================");
+    console.log(``);
+    console.log(``);
+    console.log(``);
 
+    const id = sheet + timeStart.format("DDMMYYYYhhmm");
+    if (notiList.has(id)) return;
+
+    notiList.set(id, true)
+    await sendNotificationToTopic(
+        "ADMIN", "Thông báo",
+        `Lớp ${sheet} chưa hoàn thành thực hiện điểm danh, số lượng học sinh chưa điểm danh: ${status.unknown}`,
+        { type: "attendance" },
+        "https://attendance.jmt.vn"
+    );
+    await sendEmailToTopic(
+        "ADMIN",
+        {
+            subject: `Lớp ${sheet} chưa hoàn thành thực hiện điểm danh`,
+            html: `<p>
+                    <b>Thông tin điểm danh lúc ${moment().format("HH:mm DD/MM/YYYY")}<b>
+                    <br>
+                    <b>Lớp: ${sheet}</b>
+                    <br>
+                    <b>Thời gian: ${timeStart.format("HH:mm")}</b>
+                    <br>
+                    <b>Số lượng học sinh:</b>
+                    <br>
+                    <b>Vắng: ${status.absent}</b>
+                    <br>
+                    <b>Vắng có phép: ${status.absendKnown}</b>
+                    <br>
+                    <b>Vào muộn: ${status.late}</b>
+                    <br>
+                    <b>Có mặt: ${status.onTime}</b>
+                    <br>
+                    <b>Chưa điểm danh: ${status.unknown}</b>
+
+                </p>`,
+            text: `
+                    Thông tin điểm danh lúc ${moment().format("HH:mm DD/MM/YYYY")}
+                    Lớp: ${sheet}
+                    Thời gian: ${timeStart.format("HH:mm")}
+                    Số lượng học sinh:
+                    Vắng: ${status.absent}
+                    Vắng có phép: ${status.absendKnown}
+                    Vào muộn: ${status.late}
+                    Có mặt: ${status.onTime}
+                    Chưa điểm danh: ${status.unknown}
+                `
+        }
+    );
+
+    //         if(v.token && v.token.length > 0){
+    //             notiList.set(id, true)
+    //             sendNotificationToDevice(v.token, "Thông báo", `Lớp: ${sheet} chưa thực hiện điểm danh`, {type: "attendance_late"});
+    //         }
+    // })
+    //TODO: send email, notification
+
+
+}
+
+const sendNotiToTeacher = async (sheet, student) => {
+    const notiId = sheet + student.class + moment(new Date()).startOf("D").format("DDMMYYYY") + student.name;
+    if (notiList.has(notiId)) return;
+    notiList.set(notiId, student);
+    sendNotificationToTopic(
+        student.class.toUpperCase(), "Thông báo",
+        `Bạn có học sinh vắng: ${student.name} lớp ${sheet} `,
+        { type: "attendance" },
+        "https://attendance.jmt.vn"
+    );
+    sendEmailToTopic(
+        student.class.toUpperCase(),
+        {
+            subject: "Thông báo vắng học",
+            html: `<p>Bạn có học sinh vắng: ${student.name} lớp ${sheet} </p>`,
+            text: `Bạn có học sinh vắng: ${student.name} lớp ${sheet} `
+        }
+    );
 }
 
 setInterval(async () => {
     try {
         await start();
-        
+
     } catch (error) {
         console.log(error);
     }

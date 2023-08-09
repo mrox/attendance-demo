@@ -1,15 +1,18 @@
-const { google } = require('googleapis');
+const _ = require('lodash');
 const {_getGoogleSheetClient, _readGoogleSheet} = require('./sheet.service');
-const sheetId = '1dRH0Sk1OY-mOvB6cX001zBj5A2TtO1d4nPY_BUAJ8K4'
+const {SHEET_ID} = require('../config');
+const { addTokenToTopic, removeTokenFromTopic } = require('./notification.service');
 const tabName = 'GV'
-const range = 'A:G'
 let teacherList = []
 let adminList = []
+let classList = []
+let emailList = new Map();
 async function getTeachers() {
     console.log(`Get teachers`);
-    const googleSheetClient = await _getGoogleSheetClient();
-    const data = await _readGoogleSheet(googleSheetClient, sheetId, tabName, range);
+    const data = await _readGoogleSheet(tabName);
     const teachers = [];
+    const admins = []
+    const classes = []
     if (!data) {
         console.log('No data found.');
         return [];
@@ -26,15 +29,20 @@ async function getTeachers() {
                 notiEmail: e[6] === 'TRUE' ? true : false,
             }
             teachers.push(teacher);
+            classes.push(...teacher.class)
             // console.log(teacher.class);
             if(teacher.class.includes('ADMIN')){
-                adminList.push(teacher)
+                admins.push(teacher)
             }
-            
         }
     });
     teacherList = teachers
-    console.log(teacherList);
+    adminList = admins
+    classList = _.union(classes)
+    classList.forEach((e) => {
+        emailList.set(e, teachers.filter(t => t.notiEmail && t.class.includes(e)).map(t => t.email))
+    })
+    // console.log(emailList);
     return teachers;
 }
 
@@ -49,8 +57,7 @@ async function updateTeacherTokenByEmail(email, token) {
     const teacher = teachers.find(e => e.email == email);
     if (teacher) {
         teacher.token = token;
-        const googleSheetClient = await _getGoogleSheetClient();
-        const data = await _readGoogleSheet(googleSheetClient, sheetId, tabName, range);
+        const data = await _readGoogleSheet(tabName);
         const row = data.findIndex(e => e[2] == email);
         const column = 4;
         const updateRange = `${tabName}!${String.fromCharCode(65 + column)}${row + 1}`;
@@ -66,6 +73,7 @@ async function updateTeacherTokenByEmail(email, token) {
         });
         console.log(updateResult);
     }
+    getTeachers()
 }
 
 async function updateTeacherByEmail(newTeacher) {
@@ -74,8 +82,9 @@ async function updateTeacherByEmail(newTeacher) {
 
     const teacher = teachers.find(e => e.email == newTeacher.email);
     if (teacher) {
-        const googleSheetClient = await _getGoogleSheetClient();
-        const data = await _readGoogleSheet(googleSheetClient, sheetId, tabName, range);
+        await unSubTopics(teacher.token, teacher.class);
+        await addTokenToTopic(newTeacher.token, newTeacher.class.split(",").map(e => e.trim().toUpperCase()));
+        const data = await _readGoogleSheet( tabName);
         const row = data.findIndex(e => e[2] == teacher.email);
         const column = 1;
         const updateRange = `${tabName}!${String.fromCharCode(65 + column)}${row + 1}`;
@@ -92,8 +101,9 @@ async function updateTeacherByEmail(newTeacher) {
 
     }
     else {
+        await addTokenToTopic(newTeacher.token, newTeacher.class.split(",").map(e => e.trim().toUpperCase()));
         const googleSheetClient = await _getGoogleSheetClient();
-        const data = await _readGoogleSheet(googleSheetClient, sheetId, tabName, range);
+        const data = await _readGoogleSheet(tabName);
         const row = data.length;
         const column = 0;
         const updateRange = `${tabName}!${String.fromCharCode(65 + column)}${row+1}`;
@@ -102,12 +112,13 @@ async function updateTeacherByEmail(newTeacher) {
             values: updateValue
         }
          updateResult = await googleSheetClient.spreadsheets.values.update({
-            spreadsheetId: sheetId,
+            spreadsheetId: SHEET_ID,
             range: updateRange,
             valueInputOption: 'USER_ENTERED',
             resource: updateBody
         });
     }
+    getTeachers()
     return updateResult;
 }
 
@@ -115,9 +126,18 @@ const getTecherByClass = (classId) => {
     const teachers = teacherList.filter(e => e.class.includes(classId));
     return teachers;
 }
+
+const unSubTopics = async (token , topics) => {
+    for (const c of topics) {
+        await removeTokenFromTopic(token, c)
+    }
+}
+
 module.exports = {
     teacherList,
     adminList,
+    classList,
+    emailList,
     getTeachers,
     getTeacherByEmail,
     updateTeacherTokenByEmail,

@@ -7,6 +7,7 @@ const path = require('path');
 const express = require('express')
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const { addTokenToTopic } = require('./services/notification.service.js');
 
 const app = express()
 const port = 3000
@@ -28,6 +29,20 @@ app.get('/api/teachers/notification', async (req, res) => {
     res.send(notis);
 });
 
+app.get('/api/migrate', async (req, res) => {
+    const t = await teachers.getTeachers();
+    t.forEach(async (e) => {
+        if(e.token && e.token.length > 0 && e.notiApp)
+        {
+            for (const c of e.class) {
+                const rs = await addTokenToTopic(e.token, c);
+                console.log(rs);
+            }
+            
+        }
+    })
+    res.json(t)
+});
 
 // Have Node serve the files for our built React app
 app.use(express.static(path.resolve(__dirname, 'dist')));

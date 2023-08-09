@@ -1,7 +1,6 @@
 const { google } = require('googleapis');
-
+const {SHEET_ID} = require('../config');
 const serviceAccountKeyFile = "./attendance-394502-807890f51e2a.json";
-const sheetId = '1dRH0Sk1OY-mOvB6cX001zBj5A2TtO1d4nPY_BUAJ8K4'
 
 async function _getGoogleSheetClient() {
     const auth = new google.auth.GoogleAuth({
@@ -9,17 +8,18 @@ async function _getGoogleSheetClient() {
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
     const authClient = await auth.getClient();
+
     return google.sheets({
         version: 'v4',
         auth: authClient,
     });
 }
 
-async function _readGoogleSheet(googleSheetClient, sheetId, tabName, range) {
-    
+async function _readGoogleSheet( tabName ) {
+    const googleSheetClient = await _getGoogleSheetClient();
     const res = await googleSheetClient.spreadsheets.values.get({
-        spreadsheetId: sheetId,
-        range: `${tabName}!${range}`,
+        spreadsheetId: SHEET_ID,
+        range:tabName,
     });
 
     return res.data.values;
@@ -28,7 +28,7 @@ async function _readGoogleSheet(googleSheetClient, sheetId, tabName, range) {
 async function _getSheets(){
     const googleSheetClient = await _getGoogleSheetClient();
     const res = await googleSheetClient.spreadsheets.get({
-        spreadsheetId: sheetId,
+        spreadsheetId: SHEET_ID,
     })
     return res.data.sheets
 }
