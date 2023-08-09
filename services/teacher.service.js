@@ -46,44 +46,21 @@ async function getTeachers() {
     return teachers;
 }
 
-async function getTeacherByEmail(email) {
-    const teachers = await getTeachers();
-    const teacher = teachers.find(e => e.email == email);
-    return teacher;
-}
 
-async function updateTeacherTokenByEmail(email, token) {
-    const teachers = await getTeachers();
-    const teacher = teachers.find(e => e.email == email);
-    if (teacher) {
-        teacher.token = token;
-        const data = await _readGoogleSheet(tabName);
-        const row = data.findIndex(e => e[2] == email);
-        const column = 4;
-        const updateRange = `${tabName}!${String.fromCharCode(65 + column)}${row + 1}`;
-        const updateValue = [[token]];
-        const updateBody = {
-            values: updateValue
-        }
-        const updateResult = await googleSheetClient.spreadsheets.values.update({
-            spreadsheetId: sheetId,
-            range: updateRange,
-            valueInputOption: 'USER_ENTERED',
-            resource: updateBody
-        });
-        console.log(updateResult);
-    }
-    getTeachers()
-}
 
 async function updateTeacherByEmail(newTeacher) {
     let updateResult ;
     const teachers = await getTeachers();
+    const googleSheetClient = await _getGoogleSheetClient();
 
     const teacher = teachers.find(e => e.email == newTeacher.email);
     if (teacher) {
         await unSubTopics(teacher.token, teacher.class);
-        await addTokenToTopic(newTeacher.token, newTeacher.class.split(",").map(e => e.trim().toUpperCase()));
+        newTeacher.class.split(",").map(e => e.trim().toUpperCase()).forEach(e => {
+
+             addTokenToTopic(newTeacher.token, e);
+        })
+
         const data = await _readGoogleSheet( tabName);
         const row = data.findIndex(e => e[2] == teacher.email);
         const column = 1;
@@ -92,8 +69,8 @@ async function updateTeacherByEmail(newTeacher) {
         const updateBody = {
             values: updateValue
         }
-         updateResult = await googleSheetClient.spreadsheets.values.update({
-            spreadsheetId: sheetId,
+         updateResult = googleSheetClient.spreadsheets.values.update({
+            spreadsheetId: SHEET_ID,
             range: updateRange,
             valueInputOption: 'USER_ENTERED',
             resource: updateBody
@@ -101,8 +78,10 @@ async function updateTeacherByEmail(newTeacher) {
 
     }
     else {
-        await addTokenToTopic(newTeacher.token, newTeacher.class.split(",").map(e => e.trim().toUpperCase()));
-        const googleSheetClient = await _getGoogleSheetClient();
+        newTeacher.class.split(",").map(e => e.trim().toUpperCase()).forEach(e => {
+            addTokenToTopic(newTeacher.token, e);
+        })
+        // await addTokenToTopic(newTeacher.token, );
         const data = await _readGoogleSheet(tabName);
         const row = data.length;
         const column = 0;
@@ -111,7 +90,7 @@ async function updateTeacherByEmail(newTeacher) {
         const updateBody = {
             values: updateValue
         }
-         updateResult = await googleSheetClient.spreadsheets.values.update({
+         updateResult = googleSheetClient.spreadsheets.values.update({
             spreadsheetId: SHEET_ID,
             range: updateRange,
             valueInputOption: 'USER_ENTERED',
@@ -122,10 +101,6 @@ async function updateTeacherByEmail(newTeacher) {
     return updateResult;
 }
 
-const getTecherByClass = (classId) => {
-    const teachers = teacherList.filter(e => e.class.includes(classId));
-    return teachers;
-}
 
 const unSubTopics = async (token , topics) => {
     for (const c of topics) {
@@ -139,8 +114,5 @@ module.exports = {
     classList,
     emailList,
     getTeachers,
-    getTeacherByEmail,
-    updateTeacherTokenByEmail,
-    updateTeacherByEmail,
-    getTecherByClass
+    updateTeacherByEmail
 }
