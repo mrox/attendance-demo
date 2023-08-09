@@ -25,7 +25,7 @@ app.post('/api/teachers', async (req, res) => {
 });
 
 app.get('/api/teachers/notification', async (req, res) => {
-    const notis = global.notiList?.get(req.query['email'])
+    const notis = global.notiList?.get(req.query['class'])
     res.send(notis);
 });
 

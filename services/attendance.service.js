@@ -3,6 +3,7 @@ const moment = require('moment');
 const { _readGoogleSheet, _getSheets } = require('./sheet.service');
 const { sendNotificationToTopic } = require('./notification.service');
 const { sendNotificationEmail, sendEmailToTopic } = require('./email.service');
+const {SHEET_ID} = require('../config');
 
 const notiList = new Map();
 global.notiList = new Map();
@@ -166,6 +167,20 @@ const sendNotiToAdmin = async (sheet, timeStart, status) => {
 const sendNotiToTeacher = async (sheet, student) => {
     const notiId = sheet + student.class + moment(new Date()).startOf("D").format("DDMMYYYY") + student.name;
     if (notiList.has(notiId)) return;
+
+    let saveNoti = {
+        name: student.name,
+        time: moment(new Date()).format("HH:mm"),
+        key: SHEET_ID,
+        sheetId: sheet
+    }
+    if(global.notiList.has(student.class)){
+        const noti = global.notiList.get(student.class);
+        noti.push(saveNoti);
+    } else {
+        global.notiList.set(student.class, [saveNoti]);
+    }
+
     notiList.set(notiId, student);
     try {
 
