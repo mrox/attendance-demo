@@ -25,8 +25,17 @@ app.post('/api/teachers', async (req, res) => {
 });
 
 app.get('/api/teachers/notification', async (req, res) => {
-    const notis = global.notiList?.get(req.query['class'])
-    res.send(notis);
+    let classes = req.query['class'];
+    if(!classes) classes = [];
+    else classes = classes.split(',');
+    let data = []
+    for (const c of classes) {
+        const notis = global.notiList?.get(c);
+        if(notis) {
+           data = data.concat(notis);
+        }
+    }
+    res.send(data);
 });
 
 app.get('/api/migrate', async (req, res) => {
