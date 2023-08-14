@@ -27,9 +27,9 @@ const getAttendance = async (sheet) => {
     const students = []
     data.forEach((e, row) => {
         if (row == 0) {
-            e.forEach(async (e1, column) => {
-                if (moment(e1, "MM/DD/YYYY", true).isValid()) {
-                    const columnDate = moment(e1, "MM/DD/YYYY");
+            e.forEach(async (e1, column) => {               
+                if (moment(e1, "MM/DD/YYYY", true).isValid() || moment(e1.trim(), "ddd, MMM D,", true).isValid()) {
+                    const columnDate = moment(e1, "MM/DD/YYYY", true).isValid() ? moment(e1, "MM/DD/YYYY"):moment(e1.trim(), "ddd, MMM D,");
                     const today = moment(new Date()).startOf("D")
                     if (columnDate.isSame(today)) {
                         const time = data[row + 1][column];
@@ -86,7 +86,9 @@ const getAttendance = async (sheet) => {
 
 const sendNotiToAdmin = async (sheet, timeStart, status) => {
     console.log(``);
-    console.log(`====== ${sheet}: ${moment(timeStart).format("HH:mm MM/DD")}======`);
+    console.log(`+===========================================================+`);
+    console.log(`|  ${sheet}: ${moment(timeStart).format("HH:mm MM/DD")}`);     
+    console.log(`+-----------------------------------------------------------+`);
     console.log("|  sendLateAttendance to admin");
     console.log(`|  Lớp: ${sheet} chưa hoàn thành thực hiện điểm danh`);
     console.log(`|  Thời gian: ${timeStart.format("HH:mm")}`);
@@ -96,9 +98,7 @@ const sendNotiToAdmin = async (sheet, timeStart, status) => {
     console.log(`|      Vào muộn: ${status.late}`);
     console.log(`|      Có mặt: ${status.onTime}`);
     console.log(`|      Chưa điểm danh: ${status.unknown}`);
-    console.log("====================================");
-    console.log(``);
-    console.log(``);
+    console.log(`+===========================================================+`);
     console.log(``);
 
     const id = sheet + timeStart.format("DDMMYYYYhhmm");
